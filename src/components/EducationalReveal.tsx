@@ -101,7 +101,30 @@ export default function EducationalReveal({ collectedData }: Props) {
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-800 mb-2">Personal Info</h4>
+                  <h4 className="font-semibold text-gray-800 mb-2">🔍 Device Details</h4>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p><strong>Device:</strong> {collectedData.deviceInfo?.deviceName || 'Unknown'}</p>
+                    <p><strong>Type:</strong> {collectedData.deviceInfo?.deviceType || 'Unknown'}</p>
+                    <p><strong>OS:</strong> {collectedData.deviceInfo?.operatingSystem || 'Unknown'}</p>
+                    <p><strong>Browser:</strong> {collectedData.deviceInfo?.browser} {collectedData.deviceInfo?.browserVersion}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-800 mb-2">📱 Hardware Info</h4>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p><strong>Screen:</strong> {collectedData.deviceInfo?.screenDetails.resolution}</p>
+                    <p><strong>Available:</strong> {collectedData.deviceInfo?.screenDetails.availableResolution}</p>
+                    <p><strong>Color Depth:</strong> {collectedData.deviceInfo?.screenDetails.colorDepth}-bit</p>
+                    <p><strong>Pixel Ratio:</strong> {collectedData.deviceInfo?.screenDetails.pixelRatio}x</p>
+                    <p><strong>CPU Cores:</strong> {collectedData.deviceInfo?.hardwareDetails.cores || 'Unknown'}</p>
+                    <p><strong>RAM:</strong> {collectedData.deviceInfo?.hardwareDetails.memory}</p>
+                    <p><strong>Touch:</strong> {collectedData.deviceInfo?.hardwareDetails.touchSupport ? 'Yes' : 'No'}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-800 mb-2">👤 Personal Info</h4>
                   <div className="text-sm text-gray-600 space-y-1">
                     <p><strong>Name:</strong> {collectedData.userName || 'Not provided'}</p>
                     <p><strong>IP Address:</strong> {collectedData.ip || 'Fetching...'}</p>
@@ -111,12 +134,11 @@ export default function EducationalReveal({ collectedData }: Props) {
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-4 md:col-span-2">
-                  <h4 className="font-semibold text-gray-800 mb-2">Device & Browser</h4>
+                  <h4 className="font-semibold text-gray-800 mb-2">🌐 Browser & Network</h4>
                   <div className="text-sm text-gray-600 space-y-1">
                     <p><strong>Platform:</strong> {collectedData.platform}</p>
-                    <p><strong>Screen:</strong> {collectedData.screenResolution}</p>
-                    <p><strong>User Agent:</strong> <span className="font-mono text-xs">{collectedData.userAgent}</span></p>
                     <p><strong>Referrer:</strong> {collectedData.referrer}</p>
+                    <p><strong>User Agent:</strong> <span className="font-mono text-xs">{collectedData.userAgent}</span></p>
                   </div>
                 </div>
               </div>

